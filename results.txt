@@ -1,0 +1,342 @@
+########################################################################
+Running strategy: zero_shot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Who plays quarterback for the Seattle Seahawks?
+
+SQL Syntax Response:
+SELECT p.first_name, p.last_name
+FROM player pl
+JOIN person p ON pl.person_id = p.person_id
+JOIN team t ON pl.team_id = t.team_id
+JOIN team_location tl ON t.location_id = tl.location_id
+WHERE pl.position = 'QB' AND t.team_name = 'Seattle Seahawks';
+
+Query Raw Response:
+[('Sam', 'Darnold')]
+
+Friendly Response:
+The quarterback for the Seattle Seahawks is Sam Darnold.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Which player has the most receiving yards?
+
+SQL Syntax Response:
+SELECT p.first_name, p.last_name, SUM(os.receiving_yards) AS total_receiving_yards
+FROM player pl
+JOIN person p ON pl.person_id = p.person_id
+JOIN offensive_stats os ON pl.player_id = os.player_id
+GROUP BY pl.player_id
+ORDER BY total_receiving_yards DESC
+LIMIT 1;
+
+Query Raw Response:
+[('Davante', 'Adams', 351.0)]
+
+Friendly Response:
+The player with the most receiving yards is Davante Adams, with a total of 351 yards.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Who has the most rushing yards?
+
+SQL Syntax Response:
+SELECT p.first_name, p.last_name, SUM(os.rushing_yards) AS total_rushing_yards
+FROM player pl
+JOIN person p ON pl.person_id = p.person_id
+JOIN offensive_stats os ON pl.player_id = os.player_id
+WHERE pl.position = 'RB'
+GROUP BY pl.player_id
+ORDER BY total_rushing_yards DESC
+LIMIT 1;
+
+Query Raw Response:
+[('Christian', 'McCaffrey', 330.0)]
+
+Friendly Response:
+The player with the most rushing yards is Christian McCaffrey, with a total of 330 yards.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Which quarterback has thrown the most touchdowns?
+
+SQL Syntax Response:
+SELECT p.first_name, p.last_name, SUM(os.touchdowns) AS total_touchdowns
+FROM player pl
+JOIN person p ON pl.person_id = p.person_id
+JOIN offensive_stats os ON pl.player_id = os.player_id
+WHERE pl.position = 'QB'
+GROUP BY pl.player_id
+ORDER BY total_touchdowns DESC
+LIMIT 1;
+
+Query Raw Response:
+[('Matthew', 'Stafford', Decimal('9'))]
+
+Friendly Response:
+The quarterback who has thrown the most touchdowns is Matthew Stafford with 9 touchdowns.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Which player has the most sacks?
+
+SQL Syntax Response:
+SELECT p.first_name, p.last_name, pl.position, SUM(ds.sacks) AS total_sacks
+FROM defensive_stats ds
+JOIN player pl ON ds.player_id = pl.player_id
+JOIN person p ON pl.person_id = p.person_id
+GROUP BY ds.player_id
+ORDER BY total_sacks DESC
+LIMIT 1;
+
+Query Raw Response:
+[('DeMarcus', 'Lawrence', 'LB', 4.5)]
+
+Friendly Response:
+The player with the most sacks is DeMarcus Lawrence, who plays as a linebacker (LB) with a total of 4.5 sacks.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Who won the game between the Seahawks and Rams?
+
+SQL Syntax Response:
+SELECT 
+    CASE 
+        WHEN g.home_team_score > g.away_team_score THEN ht.team_name
+        ELSE at.team_name
+    END AS winner
+FROM 
+    game g
+JOIN 
+    team ht ON g.home_team_id = ht.team_id
+JOIN 
+    team at ON g.away_team_id = at.team_id
+WHERE 
+    (ht.team_name = 'Seahawks' AND at.team_name = 'Rams') 
+    OR 
+    (ht.team_name = 'Rams' AND at.team_name = 'Seahawks');
+
+Query Raw Response:
+[]
+
+Friendly Response:
+It looks like there is no result for the game between the Seahawks and Rams. The information might not be available in the database.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Which team scored the most points?
+
+SQL Syntax Response:
+SELECT t.team_name, 
+       SUM(CASE WHEN g.home_team_id = t.team_id THEN g.home_team_score ELSE g.away_team_score END) AS total_points
+FROM game g
+JOIN team t ON t.team_id IN (g.home_team_id, g.away_team_id)
+GROUP BY t.team_id
+ORDER BY total_points DESC
+LIMIT 1;
+
+Query Raw Response:
+[('San Francisco 49ers', Decimal('85'))]
+
+Friendly Response:
+The team that scored the most points is the San Francisco 49ers, with a total of 85 points.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Where do the 49ers play their home games?
+
+SQL Syntax Response:
+SELECT tl.city, tl.state, s.stadium_id
+FROM team t
+JOIN team_location tl ON t.location_id = tl.location_id
+JOIN stadium s ON tl.location_id = s.location_id
+WHERE t.team_name = '49ers';
+
+Query Raw Response:
+[]
+
+Friendly Response:
+I'm sorry, but I couldn't find any information in the database about where the 49ers play their home games.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Who is the head coach of the Rams?
+
+SQL Syntax Response:
+SELECT p.first_name, p.last_name
+FROM person p
+JOIN coach c ON p.person_id = c.person_id
+JOIN team t ON c.coach_id = t.coach_id
+WHERE t.team_name = 'Rams';
+
+Query Raw Response:
+[]
+
+Friendly Response:
+I'm sorry, but it looks like I don't have the current information on the head coach of the Rams.
+########################################################################
+Running strategy: single_domain_double_shot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Who plays quarterback for the Seattle Seahawks?
+
+SQL Syntax Response:
+SELECT p.first_name, p.last_name
+FROM player pl
+JOIN person p ON pl.person_id = p.person_id
+JOIN team t ON pl.team_id = t.team_id
+WHERE pl.position = 'QB'
+AND t.team_name = 'Seattle Seahawks';
+
+Query Raw Response:
+[('Sam', 'Darnold')]
+
+Friendly Response:
+The quarterback for the Seattle Seahawks is Sam Darnold.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Which player has the most receiving yards?
+
+SQL Syntax Response:
+SELECT p.first_name,
+       p.last_name,
+       SUM(os.receiving_yards) AS total_receiving_yards
+FROM offensive_stats os
+JOIN player pl ON os.player_id = pl.player_id
+JOIN person p ON pl.person_id = p.person_id
+GROUP BY p.person_id, p.first_name, p.last_name
+ORDER BY total_receiving_yards DESC
+LIMIT 1;
+
+Query Raw Response:
+[('Davante', 'Adams', 351.0)]
+
+Friendly Response:
+The player with the most receiving yards is Davante Adams, with a total of 351 yards.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Who has the most rushing yards?
+
+SQL Syntax Response:
+SELECT p.first_name,
+       p.last_name,
+       SUM(os.rushing_yards) AS total_rushing_yards
+FROM offensive_stats os
+JOIN player pl ON os.player_id = pl.player_id
+JOIN person p ON pl.person_id = p.person_id
+GROUP BY p.person_id, p.first_name, p.last_name
+ORDER BY total_rushing_yards DESC
+LIMIT 1;
+
+Query Raw Response:
+[('Christian', 'McCaffrey', 330.0)]
+
+Friendly Response:
+Christian McCaffrey has the most rushing yards, with a total of 330 yards.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Which quarterback has thrown the most touchdowns?
+
+SQL Syntax Response:
+SELECT p.first_name, 
+       p.last_name, 
+       SUM(os.touchdowns) AS total_touchdowns
+FROM offensive_stats os
+JOIN player pl ON os.player_id = pl.player_id
+JOIN person p ON pl.person_id = p.person_id
+WHERE pl.position = 'QB'
+GROUP BY p.person_id, p.first_name, p.last_name
+ORDER BY total_touchdowns DESC
+LIMIT 1;
+
+Query Raw Response:
+[('Matthew', 'Stafford', Decimal('9'))]
+
+Friendly Response:
+The quarterback who has thrown the most touchdowns is Matthew Stafford, with a total of 9 touchdowns.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Which player has the most sacks?
+
+SQL Syntax Response:
+SELECT p.first_name,
+       p.last_name,
+       SUM(ds.sacks) AS total_sacks
+FROM defensive_stats ds
+JOIN player pl ON ds.player_id = pl.player_id
+JOIN person p ON pl.person_id = p.person_id
+GROUP BY p.person_id, p.first_name, p.last_name
+ORDER BY total_sacks DESC
+LIMIT 1;
+
+Query Raw Response:
+[('DeMarcus', 'Lawrence', 4.5)]
+
+Friendly Response:
+DeMarcus Lawrence has the most sacks with a total of 4.5.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Who won the game between the Seahawks and Rams?
+
+SQL Syntax Response:
+SELECT 
+    CASE 
+        WHEN g.home_team_score > g.away_team_score THEN t1.team_name 
+        ELSE t2.team_name 
+    END AS winning_team
+FROM game g
+JOIN team t1 ON g.home_team_id = t1.team_id
+JOIN team t2 ON g.away_team_id = t2.team_id
+WHERE (t1.team_name = 'Seattle Seahawks' AND t2.team_name = 'Rams')
+   OR (t1.team_name = 'Rams' AND t2.team_name = 'Seattle Seahawks');
+
+Query Raw Response:
+[]
+
+Friendly Response:
+It looks like there isn't any information in the database about the game between the Seahawks and Rams.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Which team scored the most points?
+
+SQL Syntax Response:
+SELECT t.team_name,
+       (SUM(g.home_team_score) + SUM(g.away_team_score)) AS total_points
+FROM game g
+JOIN team t ON g.home_team_id = t.team_id OR g.away_team_id = t.team_id
+GROUP BY t.team_id, t.team_name
+ORDER BY total_points DESC
+LIMIT 1;
+
+Query Raw Response:
+[('Los Angeles Rams', Decimal('154'))]
+
+Friendly Response:
+The team that scored the most points is the Los Angeles Rams with a total of 154 points.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Where do the 49ers play their home games?
+
+SQL Syntax Response:
+SELECT tl.street, tl.city, tl.state, tl.zip
+FROM team t
+JOIN stadium s ON t.location_id = s.location_id
+JOIN team_location tl ON s.location_id = tl.location_id
+WHERE t.team_name = '49ers';
+
+Query Raw Response:
+[]
+
+Friendly Response:
+I'm sorry, but it looks like there is no information available in the database regarding the location where the 49ers play their home games.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Question:
+Who is the head coach of the Rams?
+
+SQL Syntax Response:
+SELECT p.first_name, p.last_name
+FROM coach c
+JOIN person p ON c.person_id = p.person_id
+JOIN team t ON c.coach_id = t.coach_id
+WHERE c.position = 'Head Coach'
+AND t.team_name = 'Rams';
+
+Query Raw Response:
+[]
+
+Friendly Response:
+I’m sorry, but it looks like I don’t have the information about the current head coach of the Rams.
+Done!
