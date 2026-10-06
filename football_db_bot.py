@@ -107,15 +107,16 @@ LIMIT 1;
 
 
 questions = [
-    "Who plays quarterback for the Seattle Seahawks?",
-    "Which player has the most receiving yards?",
-    "Who has the most rushing yards?",
-    "Which quarterback has thrown the most touchdowns?",
-    "Which player has the most sacks?",
-    "Who won the game between the Seahawks and Rams?",
-    "Which team scored the most points?",
-    "Where do the 49ers play their home games?",
-    "Who is the head coach of the Rams?",
+    # "Who plays quarterback for the Seattle Seahawks?",
+    # "Which player has the most receiving yards?",
+    # "Who has the most rushing yards?",
+    # "Which quarterback has thrown the most touchdowns?",
+    # "Which player has the most sacks?",
+    # "Who won the game between the Seahawks and Rams?",
+    # "Which team scored the most points?",
+    # "Where do the 49ers play their home games?",
+    # "Who is the head coach of the Rams?",
+    "How many touchdowns has the quarterback with the least amount of interceptions thrown?",
 ]
 
 
